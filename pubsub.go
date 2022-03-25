@@ -4,11 +4,8 @@ import (
 	"context"
 	"errors"
 	"log"
-	"time"
 
-	"github.com/ThreeDotsLabs/watermill"
-	"github.com/ThreeDotsLabs/watermill-googlecloud/pkg/googlecloud"
-	"github.com/ThreeDotsLabs/watermill/message"
+	"cloud.google.com/go/pubsub"
 
 	"go.k6.io/k6/js/modules"
 	"go.k6.io/k6/lib"
@@ -26,55 +23,28 @@ func init() {
 // See https://cloud.google.com/pubsub/docs/overview
 type PubSub struct{}
 
-// publisherConf provides a Pub/Sub publisher client configuration. This configuration
-// structure can be used on a client side. All parameters are optional.
 type publisherConf struct {
-	ProjectID                 string
-	PublishTimeout            int
-	Debug                     bool
-	Trace                     bool
-	DoNotCreateTopicIfMissing bool
+	ProjectID string
 }
 
-// Publisher is the basic wrapper for Google Pub/Sub publisher and uses
-// watermill as a client. See https://github.com/ThreeDotsLabs/watermill/
-//
-// Publisher represents the constructor and creates an instance of
-// googlecloud.Publisher with provided projectID and publishTimeout.
-// Publisher uses watermill StdLoggerAdapter logger.
-func (ps *PubSub) Publisher(config map[string]interface{}) *googlecloud.Publisher {
+func (ps *PubSub) Publisher(config map[string]interface{}) *pubsub.Client {
+
 	cnf := &publisherConf{}
 	err := mapstructure.Decode(config, cnf)
 	if err != nil {
 		log.Fatalf("xk6-pubsub: unable to read publisher config: %v", err)
 	}
-
-	if cnf.PublishTimeout < 1 {
-		cnf.PublishTimeout = 5
-	}
-
-	log.Print("Initialising publisher with default credentials")
-	client, err := googlecloud.NewPublisher(
-		googlecloud.PublisherConfig{
-			ProjectID:                 cnf.ProjectID,
-			Marshaler:                 googlecloud.DefaultMarshalerUnmarshaler{},
-			PublishTimeout:            time.Second * time.Duration(cnf.PublishTimeout),
-			DoNotCreateTopicIfMissing: cnf.DoNotCreateTopicIfMissing,
-		},
-		watermill.NewStdLogger(cnf.Debug, cnf.Trace),
-	)
+	ctx := context.Background()
+	client, err := pubsub.NewClient(ctx, cnf.ProjectID)
 
 	if err != nil {
-		log.Fatalf("xk6-pubsub: unable to init publisher: %v", err)
+		log.Fatalf("xk6-pubsub: unable to initialise publisher")
 	}
 
 	return client
 }
 
-// Publish publishes a message to the provided topic using provided
-// googlecloud.Publisher. The msg value must be passed as string
-// and will be converted to bytes sequence before publishing.
-func (ps *PubSub) Publish(ctx context.Context, p *googlecloud.Publisher, topic, msg string) error {
+func (ps *PubSub) Publish(ctx context.Context, p *pubsub.Client, topic, msg string) error {
 	state := lib.GetState(ctx)
 
 	if state == nil {
@@ -83,11 +53,15 @@ func (ps *PubSub) Publish(ctx context.Context, p *googlecloud.Publisher, topic, 
 		return err
 	}
 
-	err := p.Publish(
-		topic,
-		message.NewMessage(watermill.NewShortUUID(), []byte(msg)),
+	t := p.Topic(topic)
+    r := t.Publish(
+		ctx,
+		&pubsub.Message{
+			Data: []byte(msg),
+		},
 	)
 
+	_, err := r.Get(ctx)
 	if err != nil {
 		ReportError(err, "xk6-pubsub: unable to publish message")
 		return err
