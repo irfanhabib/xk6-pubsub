@@ -53,6 +53,7 @@ func (ps *PubSub) Publisher(config map[string]interface{}) *googlecloud.Publishe
 		cnf.PublishTimeout = 5
 	}
 
+	log.Print("Initialising publisher with default credentials")
 	client, err := googlecloud.NewPublisher(
 		googlecloud.PublisherConfig{
 			ProjectID:                 cnf.ProjectID,
