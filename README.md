@@ -23,7 +23,7 @@ go install github.com/k6io/xk6/cmd/xk6@latest
 export CGO_ENABLED=1
 ```
 ```shell
-xk6 build --with github.com/olvod/xk6-pubsub@latest
+xk6 build --with github.com/irfanhabib/xk6-pubsub@latest
 ```
 
 xk6 build --with github.com/k6io/xk6-redis="/Users/avpretty/pr/xk6-pubsub"
@@ -31,7 +31,6 @@ xk6 build --with github.com/k6io/xk6-redis="/Users/avpretty/pr/xk6-pubsub"
 3. Setup Google Pub/Sub configuration via environment variables:
 ```shell
 export PUBSUB_PROJECT_ID=<project_id>
-export PUBSUB_CREDENTIALS=<credentials>
 ```
 
 Or use [PubSub emulator](https://cloud.google.com/pubsub/docs/emulator#linux-macos) for local development 

@@ -14,7 +14,6 @@ import (
 	"go.k6.io/k6/lib"
 
 	"github.com/mitchellh/mapstructure"
-	"google.golang.org/api/option"
 )
 
 // Register the extension on module initialization, available to
@@ -31,7 +30,6 @@ type PubSub struct{}
 // structure can be used on a client side. All parameters are optional.
 type publisherConf struct {
 	ProjectID                 string
-	Credentials               string
 	PublishTimeout            int
 	Debug                     bool
 	Trace                     bool
@@ -61,7 +59,6 @@ func (ps *PubSub) Publisher(config map[string]interface{}) *googlecloud.Publishe
 			Marshaler:                 googlecloud.DefaultMarshalerUnmarshaler{},
 			PublishTimeout:            time.Second * time.Duration(cnf.PublishTimeout),
 			DoNotCreateTopicIfMissing: cnf.DoNotCreateTopicIfMissing,
-			ClientOptions:             withCredentials(cnf.Credentials),
 		},
 		watermill.NewStdLogger(cnf.Debug, cnf.Trace),
 	)
@@ -96,15 +93,4 @@ func (ps *PubSub) Publish(ctx context.Context, p *googlecloud.Publisher, topic, 
 	}
 
 	return nil
-}
-
-// withCredentials explicitly setup Pub/Sub credentials as option.ClientOption.
-func withCredentials(credentials string) []option.ClientOption {
-	var opt []option.ClientOption
-
-	if len(credentials) > 0 {
-		opt = append(opt, option.WithCredentialsJSON([]byte(credentials)))
-	}
-
-	return opt
 }
