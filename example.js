@@ -15,7 +15,8 @@ export default function () {
         trace: true,
         doNotCreateTopicIfMissing: false
     });
-    let error = pubsub.publish(client, 'test_topic_1', '{"StringField":"", "FloatField":0.1, "BooleanField":"false"}');
+
+    let error = pubsub.publish(client, 'test_topic_1', '{"StringField":"", "FloatField":0.1, "BooleanField":false}');
 
     check(error, {
         "is sent": err => err === null

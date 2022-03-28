@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"fmt"
 
 	"cloud.google.com/go/pubsub"
 
@@ -54,6 +55,7 @@ func (ps *PubSub) Publish(ctx context.Context, p *pubsub.Client, topic, msg stri
 	}
 
 	t := p.Topic(topic)
+	fmt.Printf("Publishing %+v", msg)
     r := t.Publish(
 		ctx,
 		&pubsub.Message{
@@ -63,7 +65,7 @@ func (ps *PubSub) Publish(ctx context.Context, p *pubsub.Client, topic, msg stri
 
 	_, err := r.Get(ctx)
 	if err != nil {
-		ReportError(err, "xk6-pubsub: unable to publish message")
+		ReportError(err, fmt.Sprintf("xk6-pubsub: unable to publish message: message was %s", msg))
 		return err
 	}
 
