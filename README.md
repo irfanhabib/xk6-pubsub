@@ -1,6 +1,6 @@
 # xk6-pubsub
 
-This is a [k6](https://go.k6.io/k6) extension using the [xk6](https://github.com/k6io/xk6) system.
+This is a [k6](https://go.k6.io/k6) extension using the [xk6](https://github.com/k6io/xk6) system. Please note that this differs from olvod/xk6-pubsub in that it uses the offical Google pubsub libraries and it relies on application default credentials. We use kubernetes workload identity in our clusters therefore no service account is injected, which is required for the root project.
 
 | :exclamation: This is a proof of concept, isn't supported by the k6 team, and may break in the future. USE AT YOUR OWN RISK! |
 |------|
