@@ -9,11 +9,6 @@ export default function () {
      */
     const client = pubsub.publisher({
         projectID: __ENV.PUBSUB_PROJECT_ID || "",
-        credentials: __ENV.PUBSUB_CREDENTIALS || "",
-        publishTimeout: 5,
-        debug: true,
-        trace: true,
-        doNotCreateTopicIfMissing: false
     });
 
     let error = pubsub.publish(client, 'test_topic_1', '{"StringField":"", "FloatField":0.1, "BooleanField":false}');

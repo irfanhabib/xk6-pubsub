@@ -55,7 +55,6 @@ func (ps *PubSub) Publish(ctx context.Context, p *pubsub.Client, topic, msg stri
 	}
 
 	t := p.Topic(topic)
-	fmt.Printf("Publishing %+v", msg)
     r := t.Publish(
 		ctx,
 		&pubsub.Message{
@@ -65,7 +64,7 @@ func (ps *PubSub) Publish(ctx context.Context, p *pubsub.Client, topic, msg stri
 
 	_, err := r.Get(ctx)
 	if err != nil {
-		ReportError(err, fmt.Sprintf("xk6-pubsub: unable to publish message: message was %s", msg))
+		ReportError(err, fmt.Sprintf("xk6-pubsub: unable to publish message: message was '%s', topic was '%s'", msg, topic))
 		return err
 	}
 
